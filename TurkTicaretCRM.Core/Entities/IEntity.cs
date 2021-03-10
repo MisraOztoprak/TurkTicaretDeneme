@@ -6,5 +6,6 @@ namespace TurkTicaretCRM.Core.Entities
 {
     public interface IEntity
     {
+        //hbdfhhvhhj
     }
 }
