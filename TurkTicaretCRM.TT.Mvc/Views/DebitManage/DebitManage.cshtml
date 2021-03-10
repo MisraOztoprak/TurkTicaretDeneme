@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewBag.Title = "DebitManage";
+}
+
+<table id="customerTable" class="table table-hover">
+    <thead>
+        <tr>
+            <td>Ad</td>
+            <td>Soyad</td>
+            <td>Telefon Numarası</td>
+            <td>Adres</td>
+            <td>Kayıt Tarihi</td>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+<script>
+     $(document).ready(function () {
+        $("tbody > tr").remove();
+        createCustomerTable();
+    });
+    function createCustomerTable() {
+        $("tbody > tr").remove();
+        $.ajax({
+            url: "@Url.Action("GetAllCustomers","Customer")",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data, function (i, item) {
+                    var $tr = $('<tr>').click(function () {
+                        window.location.href = "@Url.Action("CustomerProfile", "Customer")?id=" + this.getAttribute("customerid"); 
+                    }).append(
+                        $('<td>').text(item.CustomerName),
+                        $('<td>').text(item.CustomerSurname),
+                        $('<td>').text(item.CustomerAddress),
+                        $('<td>').text(item.CustomerPhone),
+                        $('<td>').text(new Date(parseInt(item.RegistrationDate.substr(6))).toLocaleDateString())
+                    ).attr("customerID",item.CustomerID).appendTo("#customerTable");
+                });
+            }
+        })
+    }
+
+    $(document).ready(function () {
+        $('.table tr').click(function (event) {
+            if (event.target.type !== 'checkbox') {
+                 $(':checkbox', this).trigger('click');
+            }
+           
+        })
+    })
+</script>
+

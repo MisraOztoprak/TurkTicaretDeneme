@@ -1,0 +1,99 @@
+﻿
+@{
+    ViewBag.Title = "DebitTypeManage";
+}
+
+    <div class="container-fluid">
+        <!--AddCustomer Button Here-->
+        <div class="card-group">
+            <div data-toggle="modal" data-target="#debitTypeModel">
+                <a href="#" class="btn btn-success btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-flag"></i>
+                    </span>
+                    <span class="text">Borç Tipi Ekle</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Borç Tipleri Tablosu</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <div id="dataTable_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <table class="table table-bordered dataTable" id="dataTable" width="50%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: 38px;">Tip ID</th>
+                                            <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: 68px;">Borç Tipi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="debitTypeModel" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Borç Tipi Ekle</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group"><input id="inputDebitType" class="form-control form-control-user" placeholder="Borç Tipi" required /></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <button id="btnAddDebitType" type="button" class="btn btn-primary" data-dismiss="modal">Ekle</button>
+                        <button id="btnCloseDebitTypeModal" type="button" class="btn btn-primary" data-dismiss="modal">Kapat</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "@Url.Action("GetAllDebits","DebitType")",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data, function (i, item) {
+                    var $tr = $('<tr>').append(
+                        $('<td>').text(item.DebitID),
+                        $('<td>').text(item.DebitReason)
+                    ).attr("debittypeid",item.CustomerID).appendTo("#dataTable"); //.appendTo('#records_table');
+                    
+                });
+            }
+        })
+    });
+
+    $("#btnAddDebitType").on("click", function () {
+        $.ajax({
+            url: "@Url.Action("AddDebitType","DebitType")",
+            type: "POST",
+            dataType: "json",
+            data: {
+                DebitReason : $("#inputDebitType").val()
+            },
+            success: function (data) {
+
+            }
+        });
+    });
+</script>

@@ -1,0 +1,187 @@
+﻿@using TurkTicaretCRM.TT.Entities.Concrete;
+@{
+    ViewBag.Title = "CustomerProfile";
+    var customer = ViewData["Customer"] as Customer;
+}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="container">
+                <label>Ad:</label>
+                <label id="lblName">@customer.CustomerName</label>
+            </div>
+            <div class="container">
+                <label>Soyad:</label>
+                <label id="lblSurname">@customer.CustomerSurname</label>
+            </div>
+            <div class="container">
+                <label>Telefon:</label>
+                <label id="lblPhone">@customer.CustomerPhone</label>
+            </div>
+            <div class="container">
+                <label>Adres:</label>
+                <label id="lblAddress">@customer.CustomerAddress</label>
+            </div>
+            <div class="container">
+                <label>Mail:</label>
+                <label id="lblMail">@customer.CustomerMail</label>
+            </div>
+            <div class="row">
+                <button>Ödeme</button>
+                <button data-toggle="modal" data-target="#debitModal">Borç</button>
+                <button>Güncelle</button>
+            </div>
+        </div>
+        <div class="col">
+            <div>
+                Geçmiş Dönem Borçları
+            </div>
+            <table class="table table-hover" id="pastDebits">
+                <thead>
+                    <tr>
+                        <td>Borç Tipi</td>
+                        <td>Borç Toplamı</td>
+                        <td>Borç Durumu</td>
+                        <td>Kayıt Tarihi</td>
+                        <td>Güncelleme Tarihi</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    
+</div>
+
+<div class="modal fade" id="debitModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Borç Girişi</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <select id="debitTypes">
+
+                    </select>
+                </div>
+                <div class="form-group"><input type="text" id="inputDebitTotalCost" class="form-control form-control-user" placeholder="Miktar Giriniz" required /></div>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <button id="btnAddDebitToCustomer" type="button" class="btn btn-primary" data-dismiss="modal">Ekle</button>
+                    <button id="btnCloseCustomerModal" type="button" class="btn btn-primary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="debitActivityModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Borç Aktivitesi Ekle</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><input id="inputAmountPaid" class="form-control form-control-user" placeholder="Alınan Tutar" required /></div>
+                <div class="form-group"><input id="inputComment" class="form-control form-control-user" placeholder="Yorum Giriniz" required /></div>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <button id="btnAddDebitActivity" type="button" class="btn btn-primary" data-dismiss="modal">Ekle</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Kapat</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentCustomerDebitID;
+    $(document).ready(function () {
+        $.ajax({
+            url: "@Url.Action("GetAllDebitsByCustomerId", "DebitManage")",
+            type: "GET",
+            dataType: "json",
+            data: { id: @customer.CustomerID},
+            success: function (result) {
+                $.each(result, function (i, item) {
+                    debugger;
+                    $("#pastDebits").append($("<tr>").append(
+                        $("<td>").text(item.DebitID),
+                        $("<td>").text(item.DebitTotal),
+                        $("<td>").text(function () {
+                            if (item.CustomerDebitStatus === false) {
+                                return "Ödendi";
+                            }
+                            else { return "Açık";}
+                        }),
+                        $("<td>").text(new Date(parseInt(item.RegistrationDate.substr(6))).toLocaleDateString("tr-TR")),
+                        $("<td>").text(new Date(parseInt(item.UpdateDate.substr(6))).toLocaleDateString("tr-TR"))
+                    ).attr("customerDebitId", item.CustomerDebitID).click(function () {
+                        currentCustomerDebitID = item.CustomerDebitID;
+                    })).attr("data-toggle", "modal").attr("data-target", "#debitActivityModal");
+                })
+            }
+        })
+    })
+
+    $("#debitModal").ready(function () {
+        $.ajax({
+            url: "@Url.Action("GetAllDebits", "DebitType")",
+            type:"GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data,function (i, item) {
+                    $("#debitTypes").append("<option id="+ item.DebitID +">" + item.DebitReason + "</option>");
+                })
+            }
+        })
+
+        $.ajax({
+            
+        })
+    })
+
+    $("#btnAddDebitToCustomer").on("click", function () {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("AddDebit", "DebitManage")",
+            dataType: "json",
+            data: {
+                CustomerID: @customer.CustomerID,
+                DebitID: $("option:selected").attr("id"),
+                DebitReason: $("option:selected").val(),
+                DebitTotal: $("#inputDebitTotalCost").val(),
+                Debit: {DebitID: $("option:selected").attr("id"), DebitReason: $("option:selected").val()}
+            },
+            success: function () {
+                location.reload();
+            }
+        })
+    })
+
+    $("#btnAddDebitActivity").on("click", function () {
+        $.ajax({
+            url: "@Url.Action("UpdateCustomerDebitWithActivity","DebitManage")",
+            type: "POST",
+            dataType: "json",
+            data: {
+                CustomerDebitID: currentCustomerDebitID,
+                DiscountTotal: $("#inputAmountPaid").val(),
+                Comment: $("#inputComment").val(),
+                ActivityDate: new Date().toUTCString()
+                },
+            success: function () {
+                location.reload();
+            }
+        })
+    })
+</script>
+
+

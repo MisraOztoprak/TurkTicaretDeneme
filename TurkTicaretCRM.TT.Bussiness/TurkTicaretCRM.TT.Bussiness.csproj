@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TurkTicaretCRM.Core\TurkTicaretCRM.Core.csproj" />
+    <ProjectReference Include="..\TurkTicaretCRM.TT.DataAccess\TurkTicaretCRM.TT.DataAccess.csproj" />
+    <ProjectReference Include="..\TurkTicaretCRM.TT.Entities\TurkTicaretCRM.TT.Entities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="8.5.1" />
+    <PackageReference Include="Ninject" Version="3.3.4" />
+  </ItemGroup>
+
+</Project>
